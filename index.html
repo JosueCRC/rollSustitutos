@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <template>
+          <div>
+             <!-- <v-toolbar dark src="https://static.wixstatic.com/media/d35878_71ce718179fa4abcb31a803229c065bd~mv2.jpg/v1/fill/w_1847,h_774,al_c,q_85/d35878_71ce718179fa4abcb31a803229c065bd~mv2.webp" > -->
+           <v-toolbar dark src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg" >
+              <v-app-bar-nav-icon>
+          <v-menu bottom left>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                dark
+                icon
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item
+                v-for="(opcion, i) in opciones"
+                :key="i"
+                
+                @click="reporte = true"
+              >
+                <v-list-item-title>{{ opcion.title }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+              </v-app-bar-nav-icon>
+              <v-toolbar-title>Roll  de  Sustitutos  </v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon @click="cerrarSesion"><v-icon>mdi-export</v-icon></v-btn>
+            </v-toolbar>
+          </div>
+          <v-card class="mx-auto mt-10" max-width="400"v-if="!visible" >
+            <v-card-text>
+              <h1>Inicio de Sesion</h1>
+              <p class="display-1 text--primary">
+                <v-col cols="12" >
+                  <v-text-field      
+                  name="username"
+                  label="username"       
+                  value=""
+                  v-model="correoUsuario"
+                  v-on:keyup.enter="validarExisteUsuario"   
+                  ></v-text-field>  
+
+                      <v-select
+                      class="text-uppercase"
+                      v-model="ebaisAutorizados"
+                      :hint="`${ebaisAutorizados.Nombre}, ${ebaisAutorizados.Codigo}`"
+                      :items="listaEbaisAutorizados"
+                      item-text="Nombre"
+                      item-value="Codigo"      
+                      label="Establecimiento de Salud"
+                      persistent-hint
+                      return-object
+                      single-line
+                    ></v-select>
+
+
+                  <v-text-field
+                  v-if="!contraseñasVisible"
+                    id="eligeEbais"
+                    v-model="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[rules.required, rules.min]"
+                    :type="show1 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="contraseña"
+                    hint="At least 8 characters"
+                    counter
+                    @click:append="show1 = !show1"
+                  ></v-text-field>
+
+                  <v-col cols="12"></v-col>
+             <!--      <v-select
+                    v-model="elegirEbais"
+                    :hint="`${elegirEbais.ebais}, ${elegirEbais.codigo}`"
+                    :items="itemsEbais"
+                    item-text="ebais"
+                    item-value="codigo"
+                    label="Elegir Ebais"
+                    persistent-hint
+                    return-object
+                    single-line
+                  ></v-select> -->
+                
+                </v-col>
+               <!--  </v-col> -->
+              </p>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text
+                color="deep-purple accent-4"
+                @click="ingresoSistema"
+                :disabled="botonEsVisible"
+              >Ingresar
+              </v-btn>
+            </v-card-actions>      
+          </v-card>
+        </template>
+        <template v-if="visible">
+          <v-data-table
+            :headers="headers"
+            :items="desserts"
+            :search="search"
+            sort-by="calories"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat color="white">
+                <v-toolbar-title>{{ebaisAutorizados.Nombre}} </v-toolbar-title>
+                <v-divider
+                  class="mx-4"
+                  inset
+                  vertical
+                ></v-divider>
+                <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+                >
+                </v-text-field>
+                <v-spacer></v-spacer>
+
+                <!-- pantalla de filtro por rango de fechas -->
+                <template>
+                  <v-row justify="center">
+                    <v-dialog v-model="reporte" fullscreen hide-overlay transition="dialog-bottom-transition">
+                    
+                      <v-card>
+                        <v-toolbar dark color="primary">
+                          <v-btn icon dark @click="reporte = false">
+                            <v-icon>mdi-close</v-icon>
+                          </v-btn>
+                          <v-toolbar-title>Settings</v-toolbar-title>
+                          <v-spacer></v-spacer>
+                          <v-toolbar-items>
+                            <v-btn dark text @click="reporte = false">Save</v-btn>
+                          </v-toolbar-items>
+                        </v-toolbar>
+                      
+                        <v-row> 
+                        
+                          <v-col cols="12" sm="4" md="4">
+                            <v-dialog
+                              ref="dialog"
+                              v-model="modal"
+                              :return-value.sync="date"
+                              persistent
+                              width="290px"
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="date"
+                                  label="Picker in dialog"
+                                  prepend-icon="event"
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker v-model="date" scrollable>
+                                <v-spacer></v-spacer>
+                                <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
+                                <v-btn text color="primary" @click="$refs.dialog.save(date)">OK</v-btn>
+                              </v-date-picker>
+                            </v-dialog>
+                          </v-col>
+                           <v-spacer></v-spacer>
+                           <v-col cols="12" sm="4" md="4">
+                            <v-alert
+                            color="primary"
+                            dark
+                            
+                            dense
+                          >
+                          <v-badge
+                          :content="totalDomicilios"
+                          :value="totalDomicilios"
+                          color="purple"
+                          large
+                          overlap
+                        >
+                          <v-icon>mdi-vuetify</v-icon>
+                        </v-badge>
+                          Domicilios entregados 
+                          </v-alert>
+                         
+                        </v-col>
+
+                        <v-col cols="12" sm="4" md="4">
+                          <v-dialog
+                            ref="dialog2"
+                            v-model="modal2"
+                            :return-value.sync="date2"
+                            persistent
+                            width="290px"
+                          >
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-text-field
+                                v-model="date2"
+                                label="Picker in dialog2"
+                                prepend-icon="event"
+                                readonly
+                                v-bind="attrs"
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker v-model="date2" scrollable>
+                              <v-spacer></v-spacer>
+                              <v-btn text color="primary" @click="modal2 = false">Cancel</v-btn>
+                              <v-btn text color="primary" @click="$refs.dialog2.save(date2)">OK</v-btn>
+                            </v-date-picker>
+                          </v-dialog>
+                        </v-col>
+                       
+                      </v-row>
+
+              </v-list-item>
+                        </v-list>
+                        <template>
+                      
+                          <div class="text-center d-print-none">
+                            <v-btn rounded color="primary" dark @click="filtrarReporte">Mostrar Reporte</v-btn>
+                          </div>
+                        </template>
+                        <v-divider></v-divider>
+                        <template>
+                          <v-data-table
+                            :headers="encabezado"
+                            :items="pacientes2"
+                            class="elevation-1"
+                            :items-per-page="itemsPerPage"
+                            dense
+                          >
+                          <template v-slot:item.entregado="{ item }">
+                            <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
+                          </template>
+                          </v-data-table>
+                        </template>
+                      </v-card>
+                    </v-dialog>
+                  </v-row>
+                </template>
+                <!-- FIN pantalla de filtro por rango de fechas -->
+                
+                
+                <v-dialog persistent v-model="dialog" max-width="850px" >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      dark
+                      class="mb-2"
+                      v-bind="attrs"
+                      v-on="on"
+                    >Nuevo Registro</v-btn>
+                  </template>
+                  <v-card>
+
+                  	<v-row>
+                      <v-col cols="4" >
+                      
+                          <v-card-title class="d-inline">
+                                  <span class="headline">{{ formTitle }}</span>
+                                </v-card-title>
+                      
+                      </v-col>
+                      <v-col cols="4" >
+                      
+                      <v-btn	
+                            v-if="btnImprimir"
+                          class="d-inline"
+                          color="error"
+                          class="ma-2 white--text"
+                          @click= "exportPDF"
+                        >
+                          Imprimir
+                          <v-icon right dark>mdi-file-pdf</v-icon>
+                        </v-btn>
+                        
+                      </v-col>
+                      <v-col cols="4" >
+                        <v-switch class="d-inline" v-model="editedItem.entregado" :readonly="readonly" :label="`Entregado: ${editedItem.entregado}` "></v-switch>
+                      </v-col>
+                   
+                  </v-row>
+  
+                    <v-card-text class="text-uppercase">
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12" sm="6" md="4">
+                            <!-- <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field> -->
+                            <v-select
+                              v-model="editedItem.tipoid"
+                              :hint="`${editedItem.tipoid.state}, ${editedItem.tipoid.tipo}`"
+                              :items="items"
+                              item-text="state"
+                              item-value="tipo"
+                              label="Select"
+                              persistent-hint
+                              return-object
+                              single-line
+                            ></v-select>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field v-model.number="editedItem.cedula"  label="Identificacion"  :counter="`${editedItem.tipoid.minimo}`" v-on:keyup.enter="mostrarDatosPaciente"   ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="12" md="12" >
+                            <v-text-field v-model="editedItem.nombre" label="Nombre"  ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" >
+                            <v-text-field v-model.number="editedItem.FechaDesde" label="FechaDesde 1"></v-text-field>
+                          </v-col>
+                           <v-col cols="12" sm="6" >
+                            <v-text-field v-model.number="editedItem.Departamento" label="FechaDesde nito" ></v-text-field>
+                          </v-col>
+                         <!--  <v-col cols="12" sm="6" >
+                            <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
+                          </v-col> -->
+                         <!--  <v-col cols="12" sm="2" >
+                            <v-text-field v-model.number="editedItem.codConductor" v-on:keyup.enter="mostrarConductor" label="Codigo"></v-text-field>
+                          </v-col> -->
+                          <!-- <v-col cols="12" sm="10" >
+                            <v-text-field v-model="editedItem.nomConductor" label="Conductor"></v-text-field>
+                          </v-col> -->
+                        
+
+                          <v-col cols="12" sm="12" md="12">
+                            <!-- <v-select
+                              v-model="editedItem.ebais"
+                              :hint="`${editedItem.ebais.nombreEbais}, ${editedItem.ebais.codigoEbais}`"
+                              :items="itemsEbaisAdscripcion"
+                              item-text="nombreEbais"
+                              item-value="codigoEbais"
+                              label="Seleccione un Ebais"
+                              persistent-hint
+                              return-object
+                              single-line
+                            ></v-select> -->
+                          
+                            <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      {{correoUsuario}} / 
+                      <v-spacer></v-spacer>
+                        {{editedItem.varid }} - 
+                      <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
+                      <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-toolbar>
+            </template>
+            <template v-slot:item.entregado="{ item }">
+              <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+              <v-icon small  class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+              <v-icon small  class="mr-2" @click="deleteItem(item)"> mdi-delete</v-icon>
+              <v-icon small  class="mr-2" @click="printItem(item)"> mdi-printer</v-icon>
+              
+              
+            </template>
+            <template v-slot:no-data>
+              <v-btn color="primary" @click="initialize">Reset</v-btn>
+            </template>
+          </v-data-table>
+
+       
+        </template>
+      </v-main>
+      
+
+
+    </v-app>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+  	<!-- importacion para pdfjs -->
+  	<!-- <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.15/vue.js'></script> -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.4/jspdf.plugin.autotable.min.js'></script>
+
+  <script>
+  // Setup Firebase
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyC74QNWfrpQ_dlAxU9fkSGYL-qDgYxiHn4",
+    authDomain: "tiempos-d2216.firebaseapp.com",
+    databaseURL: "https://tiempos-d2216.firebaseio.com",
+    projectId: "tiempos-d2216",
+    storageBucket: "tiempos-d2216.appspot.com",
+    messagingSenderId: "361199090866",
+    appId: "1:361199090866:web:d53a63ee9b4b93c8"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+  pacientes= []
+  pacientes2= []
+  miarray=[]
+  nomConductor= ''
+  usuarioAvanzado = false
+
+  console.log(miarray)
+  arregloEbaisAutorizados = []
+      const cm = new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),    
+    data: () => ({
+
+      date: new Date().toISOString().substr(0, 10),
+      menu: false,
+      modal: false,
+
+      date2: new Date().toISOString().substr(0, 10),
+      menu2: false,
+      modal2: false,
+
+      opciones: [
+        { title: 'Reporte por Rango de Fechas' },     
+      ],
+
+
+       switch2: false,
+       readonly: false,
+       entregado: false,
+       totalDomicilios : 0,
+       itemsPerPage: 10,
+
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+        /* mostrar tabla con filtros para reporte segun rango de fechas */
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+      encabezado: [
+      { text: 'TP', value: 'tipoid.tipo' },
+        {
+          text: 'Identficacion',
+            align: 'start',
+            sortable: true,
+            value: 'cedula',
+        },
+       /*  { text: 'firebase', value: 'varid' }, */
+   
+       { text: 'Nombre', value: 'nombre' },
+          { text: 'Ebais', value: 'ebais' },
+          { text: 'Entregado SI/NO', value: 'entregado' },
+          { text: 'FechaDesde', value: 'FechaDesde' },
+          { text: 'Departamento', value: 'Departamento' },
+          { text: 'Fecha', value: 'fecha' },
+          { text: 'Usuario', value: 'correoUsuario' },
+        // { text: 'Actions', value: 'actions', sortable: false },
+      ],
+      pacientes2: [
+        ],
+
+
+        reporte: false,
+        notifications: false,
+        sound: true,
+        widgets: false,
+
+
+      /*elegirEbais: { ebais: '', codigo: '' },
+        itemsEbais: [
+          { ebais: 'Centro', codigo: '263220' },
+          { ebais: 'Pueblo', codigo: '263203' },
+          { ebais: 'AsL', codigo: '' },
+        ],*/
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+        /* permite elegir si el tipo de Identficacion del paciente */
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+        select: { state: '', tipo: ''},
+        items: [ { state: 'Nacional', tipo: '0', minimo: 9 }, { state: 'Interno', tipo: '6', minimo: 12 },  { state: 'Extranjero', tipo: '7', minimo: 10 },],
+
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-/
+        /* permite seleccionar el ebais de adscripcion para guardar en FB */
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+    ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
+        itemsEbaisAdscripcion: [
+         
+          { nombreEbais: 'COCOS', codigoEbais: '263201' },
+          { nombreEbais: 'COLINA', codigoEbais: '263202' },
+          { nombreEbais: 'PUEBLO NUEVO', codigoEbais: '263203' },
+          { nombreEbais: 'CORALES', codigoEbais: '263204' },
+          { nombreEbais: 'SANTA EDUVIGES', codigoEbais: '263205' },
+          { nombreEbais: 'CRISTOBAL COLON', codigoEbais: '263206' },
+        ],
+      
+        visible: false,
+         btnImprimir : false,
+
+        ebaisAutorizados: { Nombre: '', Codigo:'', Unidad:''},
+        listaEbaisAutorizados: [],
+       show1: false,
+        password: '',
+        contraseña:'',
+        //mostrarBoton:false,
+        correoUsuario: null,
+        correo:'',
+        abc: 'disabled',
+       // isButtonDisabled: true,
+        rules: {
+          required: value => !!value || 'Required.',
+          min: v => v.length >= 8 || 'Min 8 characters',
+          emailMatch: () => ('The email and password you entered don\'t match'),
+        },
+      dialog: false,
+      search: '',
+      headers: [
+      { text: 'TP', value: 'tipoid.tipo' },
+        {
+          text: 'Identficacion',
+            align: 'start',
+            sortable: true,
+            value: 'cedula',
+        },
+       /*  { text: 'firebase', value: 'varid' }, */
+            ///Nombre y Valores de la tabla Inicial
+        { text: 'Nombre', value: 'nombre' },
+          { text: 'Ebais', value: 'ebais' },
+          { text: 'Departamento', value: 'Departamento'},
+          { text: 'Entregado SI/NO', value: 'entregado' },
+          { text: 'FechaDesde', value: 'FechaDesde' },
+          { text: 'Fecha', value: 'fecha' },
+          { text: 'Usuario', value: 'correoUsuario' },
+        { text: 'Actions', value: 'actions', sortable: false },
+      ],
+      desserts: [],
+      editedIndex: -1,
+      editedItem: {
+        nombre: '',
+        cedula: '',
+        tipoid: '',
+        FechaDesde: 0,
+        Departamento: 0,
+        correo: '',
+        codConductor: '',
+        nomConductor: '',
+        correoUsuario: '',
+        ebais:'', nombreEbais: '', codigoEbais:'',
+        state: '',  minimo: 0,
+        entregado: false
+      },
+      defaultItem: {
+        nombre: '',
+        cedula: '',
+        tipoid: '',
+        FechaDesde: 0,
+        Departamento: 0,
+        correo: '',
+        codConductor: '',
+        nomConductor: '',
+        correoUsuario: '',
+        ebais:'', nombreEbais: '', codigoEbais:'',
+        state: '',  minimo: 0,
+        entregado: false
+      },
+    }),
+
+    computed: {
+     
+
+      dateRangeText () {
+        return this.dates.join(' ~ ')
+      },
+
+     formTitle () {
+        return this.editedIndex === -1 ? 'Nuevo Registro' : 'Edit Item'
+      },
+      botonEsVisible(){
+        //cambia el estado del boton si paswword es menor que 8
+        return this.password.length < 8
+      },
+      
+    botonGuardarVisible(){ 
+          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.FechaDesde == ''  || this.editedItem.direccion == ''
+      },
+    contraseñasVisible(){
+        return this.ebaisAutorizados.Nombre == ''
+    }
+
+    },
+    watch: {
+      dialog (val) {
+        val || this.close()
+      },
+    },
+
+   
+  created () {
+this.cerrarSesion()
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          // User is signed in.
+          console.log('Existe usuario Activo')   
+          console.info(user.uid)
+          console.log (user)
+          this.visible=true 
+              ///////////////////////////////
+             //Leer documentos en Fire Base//
+             ///////////////////////////////
+            coleccion = 'roll'// < esta variable en cual coleccion se van a Guardar los datos  //// *('Domicilios' + this.ebaisAutorizados.Codigo)  
+            console.log(coleccion + this.ebaisAutorizados.Unidad + "<>>que es esto ><<<<<" )
+           
+           /*    if  (this.ebaisAutorizados.Unidad < 1){
+                alert("SE HA RECARGADO LA PAGINA -- DEBE VOLVER A INGRESAR AL SISTEMA")
+                this.visible=false
+                this.cerrarSesion()
+              }  */
+        
+            console.log  (this.ebaisAutorizados.Codigo + " <0")
+            console.log  (this.ebaisAutorizados.Nombre + " <1")
+            console.log  (this.ebaisAutorizados.Unidad + " <2")
+           
+            //coleccion= ('CopiasFechaDesde' )    
+
+            // fechaActual = new Date()
+            // var myTimestamp = firebase.firestore.Timestamp.fromDate(new Date("2020-08-14"));
+            // var myTimestamp2 = firebase.firestore.Timestamp.fromDate(new Date("2020-08-11"));
+            //fechaActual = fechaActual.getTime()/1000.0,
+           // console.log (myTimestamp)
+
+              console.log(coleccion + this.ebaisAutorizados.Unidad)
+
+
+              //.collection("roll2632").where("Departamento", "==", "Farmacia") 
+              //collection(coleccion + this.ebaisAutorizados.Unidad ).orderBy("Fecha", "desc")
+
+
+              //Aqui se carga la informacion que se muestra en la tabla al iniciar el programa
+            db.collection(coleccion + this.ebaisAutorizados.Unidad ).where("Departamento", "==", this.ebaisAutorizados.Nombre).onSnapshot((querySnapshot) => {
+                      pacientes.length = 0;
+                      querySnapshot.forEach((doc) => {         
+                      var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();   
+                          pacientes.push({
+                                tipoid: doc.data().TipoID, 
+                                varid: doc.id, 
+                                cedula: doc.data().Cedula, 
+                                nombre: doc.data().Nombre,
+                                ebais: doc.data().Ebais,
+                                FechaDesde: doc.data().FechaDesde,
+                                Departamento: doc.data().Departamento,
+                                correo: doc.data().Correo,
+                                nomConductor: doc.data().codigoConductor,
+                                codConductor: doc.data().nombreConductor, 
+                                correoUsuario: doc.data().Usuario,
+                                entregado: doc.data().Entregado,
+                                fecha: fechaRegistro,
+                                direccion: doc.data().Direccion,          
+                              });    
+                              
+                        });
+                        console.log(querySnapshot.size);    
+                                                           
+                       
+                    });
+        } else {
+          // User is signed out.
+          console.log('No se ha iniciado sesion.')
+          this.visible=false 
+        }
+      });         
+    this.initialize()     
+    },
+
+
+
+    methods: {
+      initialize () {
+       this.desserts = []
+       this.desserts = pacientes
+       console.log(pacientes)
+
+      },
+
+      // getColor (estado) {
+      //   if (estado == "Solicitado") return 'red'
+      //   else if (estado == "263203") return 'orange'
+      //   else return 'green'
+      // },
+
+      cfecha(){
+        console.log(this.dates[0])
+        this.dates[0] = firebase.firestore.Timestamp.fromDate(new Date());
+        lafecha =  this.dates[0] = firebase.firestore.Timestamp.fromDate(new Date());
+        console.log(lafecha)
+       
+        
+      },
+
+      filtrarReporte(){
+          var fecha1 = firebase.firestore.Timestamp.fromDate(new Date(this.date));
+          var fecha2 = firebase.firestore.Timestamp.fromDate(new Date(this.date2 + ' '+ "23:59"));
+           db.collection('Domicilios2632')
+           .where("Fecha",">", fecha1).where("Fecha","<", fecha2)
+           .orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
+                    pacientes2.length = 0;
+                      querySnapshot.forEach((doc) => {
+                         
+                        var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();  
+                        console.log(doc.id, " => ", doc.data());
+                        pacientes2.push({
+                                tipoid: doc.data().TipoID, 
+                                varid: doc.id, 
+                                cedula: doc.data().Cedula, 
+                                nombre: doc.data().Nombre,
+                                ebais: doc.data().Ebais,
+                                FechaDesde: doc.data().FechaDesde,
+                                Departamento: doc.data().Departamento,
+                                correo: doc.data().Correo,
+                                nomConductor: doc.data().codigoConductor,
+                                codConductor: doc.data().nombreConductor, 
+                                correoUsuario: doc.data().Usuario,
+                                entregado: doc.data().Entregado,
+                                fecha: fechaRegistro,
+                                direccion: doc.data().Direccion,       
+                                
+                              });  
+                                
+
+                   });
+                   console.log(querySnapshot.size);   
+                   this.totalDomicilios = (querySnapshot.size)
+                  
+
+                   this.pacientes2 = []
+                    this.pacientes2 = pacientes2
+          });
+     
+    },
+
+  mostrarConductor: function(){
+
+ codigo = this.editedItem.codConductor
+      console.log(codigo)
+     /* db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot)=> {
+        querySnapshot.forEach((doc) {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data().Nombre);
+            nomConductor = doc.data().Nombre
+            console.log ('chofer >>'+ nomConductor)
+           
+        });
+
+    })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
+           this.editedItem.nomConductor=nomConductor
+
+*/
+
+      db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Nombre);
+                     //console.log(db.collection.length) ///aqui nos quedamos
+                     nomConductor = doc.data().Nombre
+                     this.editedItem.nomConductor=nomConductor
+                
+                        });
+                                        
+                    });
+      },
+
+
+              //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
+             //        CARGAR INFORMACION EXITENTE EN  LA COLECCION COPÌASFechaDesde FIREBASE  // 
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* //
+
+ mostrarDatosPaciente(){ 
+   identificacion = this.editedItem.cedula
+   console.log(identificacion)
+   console.log(this.editedItem.cedula)
+
+ /*  db.collection("CopiasFechaDesde").where("Cedula", "==", "700440896") */
+     db.collection("Domicilios2632").where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Nombre);
+                     console.log(doc.id, " => ", doc.data().TipoID);
+                     //console.log(db.collection.length) ///aqui nos quedamos
+
+                     this.editedItem.tipoid = doc.data().TipoID
+                     
+                     this.editedItem.nombre=  doc.data().Nombre
+                     this.editedItem.direccion= doc.data().Direccion
+                     this.editedItem.FechaDesde = doc.data().FechaDesde
+                     this.editedItem.Departamento = doc.data().Departamento
+                        });
+                    });
+
+ }, 
+
+exportPDF() {
+var fechaImpresion = new Date().toLocaleString();   
+
+// You'll need to make your image into a Data URL
+// Use http://dataurl.net/#dataurlmaker
+		
+		var imgData = 'data:image/jpeg;base64,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'
+		var doc =  new jsPDF('p','mm','letter')
+		//var doc =  new jsPDF( 'p', 'mm', [160, 500]);
+		
+		doc.setFontSize(11)
+		doc.setFontType('bold')
+
+		doc.text(5, 25, 'Caja Costarricense de Seguro Social')
+		doc.text(5, 30, this.ebaisAutorizados.Nombre)
+		doc.addImage(imgData, 'JPEG', 5,3, 18, 18)
+				doc.setLineWidth(0.2)
+				doc.line(5, 26, 190, 26)
+		doc.setFontSize(11)		
+		doc.setFontType('normal')		
+		doc.text(5, 40, 'Fecha Impresion: '+ fechaImpresion)
+				
+		doc.setFontSize(11)
+		doc.text(5, 45, 'Cedula: '+ this.editedItem.cedula)
+		//doc.text(0, 50, 'Nombre: '+ this.editedItem.nombre)
+
+		var splitNombre = doc.splitTextToSize(this.editedItem.nombre, 70);
+		doc.text(5, 50, splitNombre);
+
+		doc.setFontSize(13)
+		doc.setFontType('bold')	
+		doc.text(5, 60, 'FechaDesde: '+ this.editedItem.FechaDesde)
+		doc.text(5, 65, 'FechaDesde 2: '+ this.editedItem.Departamento)
+
+		doc.setFontSize(9)	
+		doc.setFontType('normal')
+		doc.text(5, 70, 'Ebais: '+ this.editedItem.ebais)
+		var splitTitle = doc.splitTextToSize(this.editedItem.direccion, 70);
+		doc.text(5, 75, splitTitle);
+		//doc.text(5, 67, 'Direccion: '+ this.editedItem.direccion)
+		doc.text(5, 95, 'Fecha Registro: '+ this.editedItem.fecha)
+
+	    doc.text(5, 100, 'Firma Recibido')
+	    doc.setLineWidth(0.5)
+		doc.line(0, 105, 200, 105)
+		doc.setFontSize(10)
+    doc.text(5, 115, this.editedItem.correoUsuario)
+		doc.text(5, 110, this.editedItem.varid)
+		doc.save('domicilios.pdf');
+    this.dialog = false
+    },
+    
+
+      validarExisteUsuario(){
+
+        if (this.correoUsuario ==  null)  {
+           Swal.fire({
+                icon: 'error',
+                title: 'Error de validacion...',
+                text: 'El usuario es requerido para continuar!',
+                footer: '<a href>Why do I have this issue?</a>'
+              })  
+            console.log('funcion')
+        }else {
+       console.log(miarray.length)
+            db.collection("usuario_sustitutos").where("correo", "==", this.correoUsuario).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Autorizado);
+                     console.log(doc.id, " => ", doc.data().nombre);
+                     console.log(" es usuario de avanzado => ", doc.data().Avanzado);
+                     usuarioAvanzado = doc.data().Avanzado  
+                     //console.log(db.collection.length) ///aqui nos quedamos
+                    miarray=[]
+                    // var miObjeto = doc.data().Autorizado
+                    //        miObjeto.forEach(function(item) {
+                    //          miarray.push({nombre: item})
+                    //       })
+                                //console.log(miarray.length)
+                                  //console.log(this.listaEbaisAutorizados.length)
+                                  miarray =  doc.data().Autorizado
+                                   
+                               this.update()
+                        });
+                        
+                        
+                                        
+                    });
+      }
+
+
+        },
+        //console.log('presiona enter')
+
+
+      update(){
+           //console.log(miarray)
+          this.listaEbaisAutorizados = miarray
+          this.readonly =  !usuarioAvanzado
+          
+      },
+
+    ingresoSistema(){
+        this.correo= this.correoUsuario
+        this.contraseña = this.password
+        console.log('aqui esta el correo '+ this.correo);
+        console.log('aqui va la pass '+this.contraseña); 
+        firebase.auth().signInWithEmailAndPassword(this.correoUsuario, this.password).catch(function(error) { 
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // ...
+        console.log(errorCode);
+        console.log(errorMessage);
+
+        alert (errorCode)
+        alert(errorMessage)
+      });
+    },
+
+    cerrarSesion(){
+        firebase.auth().signOut()
+        .then(function(){
+            //this.elegirEbais.codigo = null,
+            console.log('Cerrando Sesion...')
+            pacientes.length=0
+            
+          })
+        .catch(function(error){
+            console.log(error)
+          })
+    },
+
+    printItem(item){
+    	this.editedIndex = this.desserts.indexOf(item)
+        console.log( this.editedIndex)
+        console.log(item.varid)
+        console.log(item.cedula)
+  
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+        this.exportPDF()
+
+    },
+
+      editItem (item) {
+        this.editedIndex = this.desserts.indexOf(item)
+        console.log( this.editedIndex)
+        console.log(item.varid)
+        console.log(item.cedula)
+  
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+        this.btnImprimir = false
+      },
+
+      deleteItem (item) {
+        //const index = this.desserts.indexOf(item)
+        console.log(item)
+        //confirm('Are you sure you want to delete this item?') && this.desserts.splice(index, 1)
+        id=item.varid
+        console.log('el id es: '+id)
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.value) {
+              Swal.fire(
+                'Eliminado!',
+                'Su registro ha sido eliminado.',
+                'success'
+              )
+
+              db.collection(coleccion + this.ebaisAutorizados.Unidad ).doc(id).delete().then(function() {
+                console.log("Document successfully deleted!");
+                  }).catch(function(error) {
+                      console.error("Error removing document: ", error);
+                  });
+
+
+            }
+          })
+
+
+       
+      },
+
+      close () {
+        this.dialog = false
+         this.btnImprimir = false
+        this.$nextTick(() => {
+          this.editedItem = Object.assign({}, this.defaultItem)
+          this.editedIndex = -1
+        })
+      },
+
+      save (item,cedula) {
+        if (this.editedIndex > -1) {
+          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+            console.log(this.editedItem)
+            console.log(this.editedItem.varid)       
+            id=this.editedItem.varid
+            console.log(id)
+
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
+             //EDITAR REGISTRO EXITENTE EN LA CODELCCION FIREBASE   // 
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
+
+          var registroPacientes = db.collection(coleccion + this.ebaisAutorizados.Unidad ).doc(id);
+          return registroPacientes.update({
+            TipoID: this.editedItem.tipoid,
+              Cedula:this.editedItem.cedula,
+              Nombre: this.editedItem.nombre,
+              FechaDesde: this.editedItem.FechaDesde,
+              Departamento: this.editedItem.Departamento,
+              //Correo: this.editedItem.correo,
+              Ebais: this.editedItem.ebais,
+              Usuario: this.correoUsuario,
+            //nombreConductor: this.editedItem.codConductor,
+            //codigoConductor: this.editedItem.nomConductor,
+              Direccion: this.editedItem.direccion,
+              Entregado: this.editedItem.entregado
+              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
+              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
+            .then(function() {
+              console.log(this.dialog)
+              this.dialog = false
+              console.log(this.dialog)
+                alert("Documento fue ---  successfully updated!"); 
+              })
+            .catch(function(error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });     
+        } else {
+           //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
+           //GUARDAR UN NUEVO REGISTRO EN LA CODELCCION FIREBASE   // 
+           //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
+          this.desserts.push(this.editedItem.cedula)
+           db.collection(coleccion + this.ebaisAutorizados.Unidad ).add({
+           
+
+             TipoID: this.editedItem.tipoid,
+             Cedula: this.editedItem.cedula,
+             Nombre: this.editedItem.nombre,
+             FechaDesde: this.editedItem.FechaDesde,
+             Departamento: this.ebaisAutorizados.Nombre,
+             //Correo: this.editedItem.correo,
+             Ebais: this.ebaisAutorizados.Unidad,
+             
+             Direccion: this.editedItem.direccion,
+             Usuario: this.correoUsuario,
+             //nombreConductor: this.editedItem.codConductor,
+             //codigoConductor: this.editedItem.nomConductor,
+             Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
+             Entregado: this.editedItem.entregado,
+
+    })
+
+    .then(function(docRef) {
+        console.log("Document written with ID: ", docRef.id);
+        alert("Registro Almacenado Correctamente");
+     })
+    .catch(function(error) {
+        console.error("Error adding document: ", error);
+        alert(error); 
+     });
+        }
+        this.close()
+      },
+
+      destroyed(){
+        alert('sistema cerrado')
+      }
+    },
+    })
+  </script>
+<script>
+</script>
+</body>
+</html>
+
+
