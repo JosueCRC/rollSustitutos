@@ -267,7 +267,7 @@
                 <!-- FIN pantalla de filtro por rango de fechas -->
                 
                 
-                <v-dialog persistent v-model="dialog" max-width="850px" >
+                <v-dialog persistent v-model="dialog" fullscreen>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
                       color="primary"
@@ -278,6 +278,16 @@
                     >Nuevo Registro</v-btn>
                   </template>
                   <v-card>
+                    <v-toolbar dark color="primary">
+                      <v-btn icon dark @click="close">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                      <v-toolbar-title>Nuevo registro </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-toolbar-items>
+                        <v-btn dark text @click="save">Save</v-btn>
+                      </v-toolbar-items>
+                    </v-toolbar>
 
                   	<v-row>
                       <v-col cols="4" >
@@ -310,7 +320,7 @@
                     <v-card-text class="text-uppercase">
                       <v-container>
                         <v-row>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="2" md="2">
                             <!-- <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field> -->
                             <v-select
                               v-model="editedItem.tipoid"
@@ -324,18 +334,88 @@
                               single-line
                             ></v-select>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="3" md="3">
                             <v-text-field v-model.number="editedItem.cedula"  label="Identificacion"  :counter="`${editedItem.tipoid.minimo}`" v-on:keyup.enter="mostrarDatosPaciente"   ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="12" md="12" >
+                          <v-col cols="12" sm="7" md="7" >
                             <v-text-field v-model="editedItem.nombre" label="Nombre"  ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" >
+                          <v-col cols="12" sm="6"  md="6" >
                             <v-text-field v-model.number="editedItem.FechaDesde" label="FechaDesde 1"></v-text-field>
+                               
                           </v-col>
-                           <v-col cols="12" sm="6" >
-                            <v-text-field v-model.number="editedItem.Departamento" label="FechaDesde nito" ></v-text-field>
+                          <v-col cols="12" sm="6"  md="6" >
+                            <v-text-field v-model.number="editedItem.FechaHasta" label="FechaHasta 2"></v-text-field>
+                             
+                          <!--Campo texto html para el departamento 
+                            </v-col>
+                            <v-col cols="12" sm="6"  md="6"  >
+                              <v-text-field v-model.number="editedItem.Departamento" label="Departamento" ></v-text-field>
+                            </v-col>
+                        -->
+                          
+                          <v-col cols="12" sm="6"  md="6"  >
+                          
+                            <template>
+                              <v-row>
+                               
+                               
+                                  <v-menu
+                                    ref="menudiaslaborados"
+                                    v-model="menudiaslaborados"
+                                    :close-on-content-click="false"
+                                    :return-value.sync="diaslaborados"
+                                    transition="scale-transition"
+                                    offset-y
+                                    min-width="auto"
+                                  >
+                                    <template v-slot:activator="{ on, attrs }">
+                                      <v-combobox
+                                        v-model="diaslaborados"
+                                        multiple
+                                        chips
+                                        small-chips
+                                        label="Multiple picker in menu"
+                                        prepend-icon="mdi-calendar"
+                                        readonly
+                                        v-bind="attrs"
+                                        v-on="on"
+                                      ></v-combobox>
+                                    </template>
+                                    <v-date-picker
+                                      v-model="diaslaborados"
+                                      multiple
+                                      no-title
+                                      scrollable
+                                    >
+                                      <v-spacer></v-spacer>
+                                      <v-btn
+                                        text
+                                        color="primary"
+                                        @click="menudiaslaborados = false"
+                                      >
+                                        Cancel
+                                      </v-btn>
+                                      <v-btn
+                                        text
+                                        color="primary"
+                                        @click="$refs.menudiaslaborados.save(diaslaborados)"
+                                      >
+                                        OK
+                                      </v-btn>
+                                    </v-date-picker>
+                                  </v-menu>
+                                </v-col>
+                              </v-row>
+                            </template>
+                              
                           </v-col>
+                           
+                           <v-col cols="12" sm="6" >  <!--calendario dias trabajados-->
+                            <p> ***--- {{ordenarDiaslaborados}}</p>
+                          </v-col> <!--calendario dias trabajados-->
+                        
+                          
                          <!--  <v-col cols="12" sm="6" >
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
                           </v-col> -->
@@ -347,8 +427,8 @@
                           </v-col> -->
                         
 
-                          <v-col cols="12" sm="12" md="12">
-                            <!-- <v-select
+                          <!--<v-col cols="12" sm="12" md="12">
+                             <v-select
                               v-model="editedItem.ebais"
                               :hint="`${editedItem.ebais.nombreEbais}, ${editedItem.ebais.codigoEbais}`"
                               :items="itemsEbaisAdscripcion"
@@ -360,8 +440,8 @@
                               single-line
                             ></v-select> -->
                           
-                            <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
-                          </v-col>
+                            <!--<v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
+                          </v-col>-->
                         </v-row>
                       </v-container>
                     </v-card-text>
@@ -436,7 +516,14 @@
       const cm = new Vue({
       el: '#app',
       vuetify: new Vuetify(),    
-    data: () => ({
+    data: () => 
+  ({
+
+    diaslaborados: ['2022-09-15', '2022-09-20'],
+      menudiaslaborados: false,
+
+     
+
 
       date: new Date().toISOString().substr(0, 10),
       menu: false,
@@ -450,6 +537,7 @@
         { title: 'Reporte por Rango de Fechas' },     
       ],
 
+      
 
        switch2: false,
        readonly: false,
@@ -504,7 +592,7 @@
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-/
         /* permite seleccionar el ebais de adscripcion para guardar en FB */
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-    ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
+      ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
         itemsEbaisAdscripcion: [
          
           { nombreEbais: 'COCOS', codigoEbais: '263201' },
@@ -575,6 +663,7 @@
         cedula: '',
         tipoid: '',
         FechaDesde: 0,
+        ultimodia:0,
         Departamento: 0,
         correo: '',
         codConductor: '',
@@ -586,8 +675,11 @@
       },
     }),
 
-    computed: {
+      computed: {
      
+      ordenarDiaslaborados() {
+        return this.diaslaborados.sort();
+      },
 
       dateRangeText () {
         return this.dates.join(' ~ ')
@@ -616,8 +708,8 @@
     },
 
    
-  created () {
-this.cerrarSesion()
+      created () {
+    this.cerrarSesion()
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           // User is signed in.
@@ -802,9 +894,10 @@ this.cerrarSesion()
    identificacion = this.editedItem.cedula
    console.log(identificacion)
    console.log(this.editedItem.cedula)
+   coleccion = 'roll'
 
  /*  db.collection("CopiasFechaDesde").where("Cedula", "==", "700440896") */
-     db.collection("Domicilios2632").where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
+     db.collection(coleccion + this.ebaisAutorizados.Unidad).where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
                  querySnapshot.forEach((doc) => {                              
                     //console.log(`${doc.data()}`);
                      //console.log(doc.id, " => ", doc.data());
@@ -1033,6 +1126,8 @@ var fechaImpresion = new Date().toLocaleString();
             console.log(this.editedItem.varid)       
             id=this.editedItem.varid
             console.log(id)
+            
+           var  ultimodia = 0
 
              //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
              //EDITAR REGISTRO EXITENTE EN LA CODELCCION FIREBASE   // 
@@ -1071,12 +1166,16 @@ var fechaImpresion = new Date().toLocaleString();
            //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
           this.desserts.push(this.editedItem.cedula)
            db.collection(coleccion + this.ebaisAutorizados.Unidad ).add({
-           
+            
+     
 
              TipoID: this.editedItem.tipoid,
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
-             FechaDesde: this.editedItem.FechaDesde,
+             FechaDesde: this.dates[0],
+             //ultimodia: this.dates.length,
+             FechaHasta: this.dates[3],
+                                        
              Departamento: this.ebaisAutorizados.Nombre,
              //Correo: this.editedItem.correo,
              Ebais: this.ebaisAutorizados.Unidad,
