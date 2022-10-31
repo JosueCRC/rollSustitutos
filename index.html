@@ -340,116 +340,72 @@
                           <v-col cols="12" sm="7" md="7" >
                             <v-text-field v-model="editedItem.nombre" label="Nombre"  ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6"  md="6" >
-                            <v-text-field v-model.number="editedItem.FechaDesde" label="FechaDesde 1"></v-text-field>
-                               
-                          </v-col>
-                          <v-col cols="12" sm="6"  md="6" >
-                            <v-text-field v-model.number="editedItem.FechaHasta" label="FechaHasta 2"></v-text-field>
-                             
-                          <!--Campo texto html para el departamento 
-                            </v-col>
-                            <v-col cols="12" sm="6"  md="6"  >
-                              <v-text-field v-model.number="editedItem.Departamento" label="Departamento" ></v-text-field>
-                            </v-col>
-                        -->
-                          
-                          <v-col cols="12" sm="6"  md="6"  >
-                          
-                            <template>
-                              <v-row>
-                               
-                               
-                                  <v-menu
-                                    ref="menudiaslaborados"
-                                    v-model="menudiaslaborados"
-                                    :close-on-content-click="false"
-                                    :return-value.sync="diaslaborados"
-                                    transition="scale-transition"
-                                    offset-y
-                                    min-width="auto"
-                                  >
-                                    <template v-slot:activator="{ on, attrs }">
-                                      <v-combobox
+                         
+                    
+                          <v-col cols="12" sm="12"  md="8"  >
+                           <template>
+                                <v-row>
+                                
+                                
+                                    <v-menu
+                                      ref="menudiaslaborados"
+                                      v-model="menudiaslaborados"
+                                      :close-on-content-click="false"
+                                      :return-value.sync="diaslaborados"
+                                      transition="scale-transition"
+                                      offset-y
+                                      min-width="auto"
+                                    >
+                                      <template v-slot:activator="{ on, attrs }">
+                                        <v-combobox
+                                          v-model="ordenarDiaslaborados"
+                                          multiple
+                                          chips
+                                          small-chips
+                                          label="Multiple picker in menu"
+                                          prepend-icon="mdi-calendar"
+                                          readonly
+                                          v-bind="attrs"
+                                          v-on="on"
+                                        ></v-combobox>
+                                      </template>
+                                      <v-date-picker
                                         v-model="diaslaborados"
                                         multiple
-                                        chips
-                                        small-chips
-                                        label="Multiple picker in menu"
-                                        prepend-icon="mdi-calendar"
-                                        readonly
-                                        v-bind="attrs"
-                                        v-on="on"
-                                      ></v-combobox>
-                                    </template>
-                                    <v-date-picker
-                                      v-model="diaslaborados"
-                                      multiple
-                                      no-title
-                                      scrollable
-                                    >
-                                      <v-spacer></v-spacer>
-                                      <v-btn
-                                        text
-                                        color="primary"
-                                        @click="menudiaslaborados = false"
+                                        scrollable
                                       >
-                                        Cancel
-                                      </v-btn>
-                                      <v-btn
-                                        text
-                                        color="primary"
-                                        @click="$refs.menudiaslaborados.save(diaslaborados)"
-                                      >
-                                        OK
-                                      </v-btn>
-                                    </v-date-picker>
-                                  </v-menu>
-                                </v-col>
-                              </v-row>
+                                        <v-spacer></v-spacer>
+                                        <v-btn
+                                          text
+                                          color="primary"
+                                          @click="menudiaslaborados = false"
+                                        >
+                                          Cancel
+                                        </v-btn>
+                                        <v-btn
+                                          text
+                                          color="primary"
+                                          @click="$refs.menudiaslaborados.save(diaslaborados)"
+                                        >
+                                          OK
+                                        </v-btn>
+                                      </v-date-picker>
+                                    </v-menu>
+                                </v-row>    
                             </template>
-                              
-                          </v-col>
-                           
-                           <v-col cols="12" sm="6" >  <!--calendario dias trabajados-->
-                            <p> ***--- {{ordenarDiaslaborados}}</p>
-                          </v-col> <!--calendario dias trabajados-->
-                        
-                          
-                         <!--  <v-col cols="12" sm="6" >
-                            <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
-                          </v-col> -->
-                         <!--  <v-col cols="12" sm="2" >
-                            <v-text-field v-model.number="editedItem.codConductor" v-on:keyup.enter="mostrarConductor" label="Codigo"></v-text-field>
-                          </v-col> -->
-                          <!-- <v-col cols="12" sm="10" >
-                            <v-text-field v-model="editedItem.nomConductor" label="Conductor"></v-text-field>
-                          </v-col> -->
-                        
-
-                          <!--<v-col cols="12" sm="12" md="12">
-                             <v-select
-                              v-model="editedItem.ebais"
-                              :hint="`${editedItem.ebais.nombreEbais}, ${editedItem.ebais.codigoEbais}`"
-                              :items="itemsEbaisAdscripcion"
-                              item-text="nombreEbais"
-                              item-value="codigoEbais"
-                              label="Seleccione un Ebais"
-                              persistent-hint
-                              return-object
-                              single-line
-                            ></v-select> -->
-                          
-                            <!--<v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
-                          </v-col>-->
+                          </v-col>              
+                   
+                         
                         </v-row>
                       </v-container>
                     </v-card-text>
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      {{correoUsuario}} / 
+                     corrreo:  {{correoUsuario}} / 
                       <v-spacer></v-spacer>
-                        {{editedItem.varid }} - 
+                       Dias Trabajados {{cantDiasTrabajados}}
+                      <v-spacer></v-spacer>
+                      identificador unico  {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
                       <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
                     </v-card-actions>
@@ -508,7 +464,7 @@
   pacientes= []
   pacientes2= []
   miarray=[]
-  nomConductor= ''
+ 
   usuarioAvanzado = false
 
   console.log(miarray)
@@ -521,8 +477,6 @@
 
     diaslaborados: ['2022-09-15', '2022-09-20'],
       menudiaslaborados: false,
-
-     
 
 
       date: new Date().toISOString().substr(0, 10),
@@ -636,8 +590,8 @@
         { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
           { text: 'Departamento', value: 'Departamento'},
-          { text: 'Entregado SI/NO', value: 'entregado' },
-          { text: 'FechaDesde', value: 'FechaDesde' },
+         // { text: 'Entregado SI/NO', value: 'entregado' },
+          { text: 'DiasTrabajados', value: 'DiasTrabajados' },
           { text: 'Fecha', value: 'fecha' },
           { text: 'Usuario', value: 'correoUsuario' },
         { text: 'Actions', value: 'actions', sortable: false },
@@ -646,13 +600,12 @@
       editedIndex: -1,
       editedItem: {
         nombre: '',
-        cedula: '',
+        cedula: 0,
         tipoid: '',
-        FechaDesde: 0,
+        diaslaborados: '',
         Departamento: 0,
         correo: '',
-        codConductor: '',
-        nomConductor: '',
+       
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
@@ -660,14 +613,12 @@
       },
       defaultItem: {
         nombre: '',
-        cedula: '',
+        cedula: 0,
         tipoid: '',
-        FechaDesde: 0,
+        diaslaborados: '',
         ultimodia:0,
         Departamento: 0,
         correo: '',
-        codConductor: '',
-        nomConductor: '',
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
@@ -681,8 +632,14 @@
         return this.diaslaborados.sort();
       },
 
+      cantDiasTrabajados()
+      {
+        return  this.diaslaborados.length;
+      },
+      
+
       dateRangeText () {
-        return this.dates.join(' ~ ')
+        return this.diaslaborados.join(' ~ ')
       },
 
      formTitle () {
@@ -694,7 +651,7 @@
       },
       
     botonGuardarVisible(){ 
-          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.FechaDesde == ''  || this.editedItem.direccion == ''
+          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.FechaDesde == '' 
       },
     contraseñasVisible(){
         return this.ebaisAutorizados.Nombre == ''
@@ -732,6 +689,7 @@
             console.log  (this.ebaisAutorizados.Codigo + " <0")
             console.log  (this.ebaisAutorizados.Nombre + " <1")
             console.log  (this.ebaisAutorizados.Unidad + " <2")
+            console.log   (this.diaslaborados + " <3")
            
             //coleccion= ('CopiasFechaDesde' )    
 
@@ -759,15 +717,12 @@
                                 cedula: doc.data().Cedula, 
                                 nombre: doc.data().Nombre,
                                 ebais: doc.data().Ebais,
-                                FechaDesde: doc.data().FechaDesde,
+                               diaslaborados: doc.data().DiasLaborados,
                                 Departamento: doc.data().Departamento,
                                 correo: doc.data().Correo,
-                                nomConductor: doc.data().codigoConductor,
-                                codConductor: doc.data().nombreConductor, 
-                                correoUsuario: doc.data().Usuario,
+                                
                                 entregado: doc.data().Entregado,
                                 fecha: fechaRegistro,
-                                direccion: doc.data().Direccion,          
                               });    
                               
                         });
@@ -826,15 +781,13 @@
                                 cedula: doc.data().Cedula, 
                                 nombre: doc.data().Nombre,
                                 ebais: doc.data().Ebais,
-                                FechaDesde: doc.data().FechaDesde,
+                                
                                 Departamento: doc.data().Departamento,
-                                correo: doc.data().Correo,
-                                nomConductor: doc.data().codigoConductor,
-                                codConductor: doc.data().nombreConductor, 
+                                
                                 correoUsuario: doc.data().Usuario,
                                 entregado: doc.data().Entregado,
                                 fecha: fechaRegistro,
-                                direccion: doc.data().Direccion,       
+                                  
                                 
                               });  
                                 
@@ -850,40 +803,6 @@
      
     },
 
-  mostrarConductor: function(){
-
- codigo = this.editedItem.codConductor
-      console.log(codigo)
-     /* db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot)=> {
-        querySnapshot.forEach((doc) {
-            // doc.data() is never undefined for query doc snapshots
-            console.log(doc.id, " => ", doc.data().Nombre);
-            nomConductor = doc.data().Nombre
-            console.log ('chofer >>'+ nomConductor)
-           
-        });
-
-    })
-        .catch(function(error) {
-            console.log("Error getting documents: ", error);
-        });
-           this.editedItem.nomConductor=nomConductor
-
-*/
-
-      db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot) => {   
-                 querySnapshot.forEach((doc) => {                              
-                    //console.log(`${doc.data()}`);
-                     //console.log(doc.id, " => ", doc.data());
-                     console.log(doc.id, " => ", doc.data().Nombre);
-                     //console.log(db.collection.length) ///aqui nos quedamos
-                     nomConductor = doc.data().Nombre
-                     this.editedItem.nomConductor=nomConductor
-                
-                        });
-                                        
-                    });
-      },
 
 
               //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
@@ -908,8 +827,8 @@
                      this.editedItem.tipoid = doc.data().TipoID
                      
                      this.editedItem.nombre=  doc.data().Nombre
-                     this.editedItem.direccion= doc.data().Direccion
-                     this.editedItem.FechaDesde = doc.data().FechaDesde
+                     
+                     this.editedItem.diaslaborados = doc.data().Diaslaborados[1]
                      this.editedItem.Departamento = doc.data().Departamento
                         });
                     });
@@ -1138,17 +1057,12 @@ var fechaImpresion = new Date().toLocaleString();
             TipoID: this.editedItem.tipoid,
               Cedula:this.editedItem.cedula,
               Nombre: this.editedItem.nombre,
-              FechaDesde: this.editedItem.FechaDesde,
-              Departamento: this.editedItem.Departamento,
+          
+             
               //Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
               Usuario: this.correoUsuario,
-            //nombreConductor: this.editedItem.codConductor,
-            //codigoConductor: this.editedItem.nomConductor,
-              Direccion: this.editedItem.direccion,
-              Entregado: this.editedItem.entregado
-              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
-              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
+            
             })
             .then(function() {
               console.log(this.dialog)
@@ -1164,33 +1078,32 @@ var fechaImpresion = new Date().toLocaleString();
            //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
            //GUARDAR UN NUEVO REGISTRO EN LA CODELCCION FIREBASE   // 
            //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
+
+console.log ('cedula '+this.editedItem.cedula)
+console.log ('nombre '+this.editedItem.nombre)
+console.log ('dias lab '+this.diaslaborados)
+console.log ('DEPARTAMENTO' + this.ebaisAutorizados.Nombre)
+console.log ('CORREO '+this.correo)
+console.log ('UNIDAD '+ this.ebaisAutorizados.Unidad)
+
+
           this.desserts.push(this.editedItem.cedula)
            db.collection(coleccion + this.ebaisAutorizados.Unidad ).add({
-            
-     
 
+           
              TipoID: this.editedItem.tipoid,
              Cedula: this.editedItem.cedula,
-             Nombre: this.editedItem.nombre,
-             FechaDesde: this.dates[0],
-             //ultimodia: this.dates.length,
-             FechaHasta: this.dates[3],
-                                        
+             Nombre: this.editedItem.nombre,           
              Departamento: this.ebaisAutorizados.Nombre,
-             //Correo: this.editedItem.correo,
              Ebais: this.ebaisAutorizados.Unidad,
-             
-             Direccion: this.editedItem.direccion,
-             Usuario: this.correoUsuario,
-             //nombreConductor: this.editedItem.codConductor,
-             //codigoConductor: this.editedItem.nomConductor,
+             DiasLaborados: this.diaslaborados,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
-             Entregado: this.editedItem.entregado,
-
+             //Entregado: this.editedItem.entregado,
+       
     })
 
     .then(function(docRef) {
-        console.log("Document written with ID: ", docRef.id);
+        console.log("Document almacenado con el ID: ", docRef.id);
         alert("Registro Almacenado Correctamente");
      })
     .catch(function(error) {
