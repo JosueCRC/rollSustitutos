@@ -126,6 +126,7 @@
             sort-by="calories"
             class="elevation-1"
           >
+
             <template v-slot:top>
               <v-toolbar flat color="white">
                 <v-toolbar-title>{{ebaisAutorizados.Nombre}} </v-toolbar-title>
@@ -192,8 +193,7 @@
                            <v-col cols="12" sm="4" md="4">
                             <v-alert
                             color="primary"
-                            dark
-                            
+                            dark 
                             dense
                           >
                           <v-badge
@@ -275,7 +275,7 @@
                       class="mb-2"
                       v-bind="attrs"
                       v-on="on"
-                    >Nuevo Registro</v-btn>
+                    >Nuevo Registro...!</v-btn>
                   </template>
                   <v-card>
                     <v-toolbar dark color="primary">
@@ -338,6 +338,7 @@
                             <v-text-field v-model.number="editedItem.cedula"  label="Identificacion"  :counter="`${editedItem.tipoid.minimo}`" v-on:keyup.enter="mostrarDatosPaciente"   ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="7" md="7" >
+                            
                             <v-text-field v-model="editedItem.nombre" label="Nombre"  ></v-text-field>
                           </v-col>
                          
@@ -413,10 +414,30 @@
                 </v-dialog>
               </v-toolbar>
             </template>
-            <template v-slot:item.entregado="{ item }">
+            
+            <!-- <template v-slot:item.entregado="{ item }">
               <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
+            </template> -->
+
+            <template v-slot:item.ebais="{ item }">
+              <v-chip
+                :color="getColor(item.ebais)"
+                dark
+              >
+                {{ item.ebais}} <!-- aqui-->
+              </v-chip>
             </template>
 
+            <template v-slot:item.ebais="{ item }">
+              <v-chip
+                :color="getColor2(item.ebais)"
+                dark
+              >
+                {{ item.ebais}} <!-- aqui-->
+              </v-chip>
+            </template>
+           
+           
             <template v-slot:item.actions="{ item }">
               <v-icon small  class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
               <v-icon small  class="mr-2" @click="deleteItem(item)"> mdi-delete</v-icon>
@@ -424,6 +445,9 @@
               
               
             </template>
+
+
+
             <template v-slot:no-data>
               <v-btn color="primary" @click="initialize">Reset</v-btn>
             </template>
@@ -512,13 +536,16 @@
         },
        /*  { text: 'firebase', value: 'varid' }, */
    
-       { text: 'Nombre', value: 'nombre' },
+          { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
-          { text: 'Entregado SI/NO', value: 'entregado' },
+          //{ text: 'Entregado SI/NO', value: 'entregado' },
           { text: 'FechaDesde', value: 'FechaDesde' },
           { text: 'Departamento', value: 'Departamento' },
           { text: 'Fecha', value: 'fecha' },
           { text: 'Usuario', value: 'correoUsuario' },
+          {text: 'CantDias', value: 'DiasTrabajados'}
+        
+          
         // { text: 'Actions', value: 'actions', sortable: false },
       ],
       pacientes2: [
@@ -590,22 +617,25 @@
         { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
           { text: 'Departamento', value: 'Departamento'},
-         // { text: 'Entregado SI/NO', value: 'entregado' },
-          { text: 'DiasTrabajados', value: 'DiasTrabajados' },
+          //{ text: 'Entregado SI/NO', value: 'entregado' },
+          { text: 'Trabajados', value: 'diasTrabajados' },
           { text: 'Fecha', value: 'fecha' },
-          { text: 'Usuario', value: 'correoUsuario' },
+          //{ text: 'Usuario', value: 'correoUsuario' },
+          {text: 'CantDias', value: 'cantDiasLaborados'},
+         
+          
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      desserts: [],
+      desserts: [],///DECLARO VARIABLES QUE VOY USAR PARA CARGAR LOS DATOS
       editedIndex: -1,
       editedItem: {
         nombre: '',
         cedula: 0,
         tipoid: '',
-        diaslaborados: '',
+        diasTrabajados: '',
         Departamento: 0,
         correo: '',
-       
+        cantDiasLaborados:'',
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
@@ -615,7 +645,8 @@
         nombre: '',
         cedula: 0,
         tipoid: '',
-        diaslaborados: '',
+        diasTrabajados: '',
+        cantDiasLaborados:'',
         ultimodia:0,
         Departamento: 0,
         correo: '',
@@ -700,7 +731,8 @@
            // console.log (myTimestamp)
 
               console.log(coleccion + this.ebaisAutorizados.Unidad)
-
+              console.log ('canDias'+ this.editedItem.cantDiasLaborados)
+              
 
               //.collection("roll2632").where("Departamento", "==", "Farmacia") 
               //collection(coleccion + this.ebaisAutorizados.Unidad ).orderBy("Fecha", "desc")
@@ -717,10 +749,10 @@
                                 cedula: doc.data().Cedula, 
                                 nombre: doc.data().Nombre,
                                 ebais: doc.data().Ebais,
-                               diaslaborados: doc.data().DiasLaborados,
+                                diasTrabajados: doc.data().DiasLaborados,
                                 Departamento: doc.data().Departamento,
                                 correo: doc.data().Correo,
-                                
+                                cantDiasLaborados: doc.data().cantDiasLaborados,
                                 entregado: doc.data().Entregado,
                                 fecha: fechaRegistro,
                               });    
@@ -742,6 +774,18 @@
 
 
     methods: {
+
+      getColor (ebais) {
+        if (ebais > 400) return 'red'
+        else if (ebais > 200) return 'orange'
+        else return 'green'
+      },
+      getColor2 (ebais) {
+        if (ebais > 400) return 'blue'
+        else if (ebais > 200) return 'pink'
+        else return 'yellow'
+      },
+
       initialize () {
        this.desserts = []
        this.desserts = pacientes
@@ -814,6 +858,8 @@
    console.log(identificacion)
    console.log(this.editedItem.cedula)
    coleccion = 'roll'
+   console.log ('canDias'+this.editedItem.cantDiasLaborados)
+   console.log ('doc cant dias'+ doc.data().cantDiasLaborados)
 
  /*  db.collection("CopiasFechaDesde").where("Cedula", "==", "700440896") */
      db.collection(coleccion + this.ebaisAutorizados.Unidad).where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
@@ -830,6 +876,7 @@
                      
                      this.editedItem.diaslaborados = doc.data().Diaslaborados[1]
                      this.editedItem.Departamento = doc.data().Departamento
+                     this.editItem.cantDiasLaborados = doc.data().cantDiasLaborados
                         });
                     });
 
@@ -1096,6 +1143,7 @@ console.log ('UNIDAD '+ this.ebaisAutorizados.Unidad)
              Nombre: this.editedItem.nombre,           
              Departamento: this.ebaisAutorizados.Nombre,
              Ebais: this.ebaisAutorizados.Unidad,
+             cantDiasLaborados : this.diaslaborados.length,
              DiasLaborados: this.diaslaborados,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
              //Entregado: this.editedItem.entregado,
