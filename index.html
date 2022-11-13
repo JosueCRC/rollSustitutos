@@ -348,18 +348,20 @@
                                 <v-row>
                                 
                                 
-                                    <v-menu
+                                    <v-dialog
                                       ref="menudiaslaborados"
                                       v-model="menudiaslaborados"
                                       :close-on-content-click="false"
-                                      :return-value.sync="diaslaborados"
+                                      :return-value.sync="editedItem.diasTrabajados"
                                       transition="scale-transition"
                                       offset-y
                                       min-width="auto"
+                                      persistent
+                                      width="290px"
                                     >
                                       <template v-slot:activator="{ on, attrs }">
                                         <v-combobox
-                                          v-model="ordenarDiaslaborados"
+                                          v-model="editedItem.diasTrabajados"
                                           multiple
                                           chips
                                           small-chips
@@ -371,7 +373,7 @@
                                         ></v-combobox>
                                       </template>
                                       <v-date-picker
-                                        v-model="diaslaborados"
+                                        v-model="editedItem.diasTrabajados"
                                         multiple
                                         scrollable
                                       >
@@ -386,7 +388,7 @@
                                         <v-btn
                                           text
                                           color="primary"
-                                          @click="$refs.menudiaslaborados.save(diaslaborados)"
+                                          @click="$refs.menudiaslaborados.save(editedItem.diasTrabajados)"
                                         >
                                           OK
                                         </v-btn>
@@ -404,7 +406,7 @@
                       <v-spacer></v-spacer>
                      corrreo:  {{correoUsuario}} / 
                       <v-spacer></v-spacer>
-                       Dias Trabajados {{cantDiasTrabajados}}
+                       Dias Trabajados {{editedItem.cantDiasLaborados}}
                       <v-spacer></v-spacer>
                       identificador unico  {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
@@ -499,7 +501,7 @@
     data: () => 
   ({
 
-    diaslaborados: ['2022-09-15', '2022-09-20'],
+    diaslaborados: [],
       menudiaslaborados: false,
 
 
@@ -632,10 +634,11 @@
         nombre: '',
         cedula: 0,
         tipoid: '',
-        diasTrabajados: '',
+        diaslaborados: [],
+        cantDiasLaborados:0,
+
         Departamento: 0,
         correo: '',
-        cantDiasLaborados:'',
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
@@ -645,9 +648,8 @@
         nombre: '',
         cedula: 0,
         tipoid: '',
-        diasTrabajados: '',
-        cantDiasLaborados:'',
-        ultimodia:0,
+        diaslaborados: [],
+        cantDiasLaborados:0,
         Departamento: 0,
         correo: '',
         correoUsuario: '',
@@ -660,12 +662,12 @@
       computed: {
      
       ordenarDiaslaborados() {
-        return this.diaslaborados.sort();
+        return this.editedItem.diasTrabajados.sort();
       },
 
       cantDiasTrabajados()
       {
-        return  this.diaslaborados.length;
+        return  this.editedItem.diasTrabajados.length;
       },
       
 
@@ -752,14 +754,14 @@
                                 diasTrabajados: doc.data().DiasLaborados,
                                 Departamento: doc.data().Departamento,
                                 correo: doc.data().Correo,
-                                cantDiasLaborados: doc.data().cantDiasLaborados,
+                                cantDiasLaborados: doc.data().cantDiasTrabajados,
+                                
                                 entregado: doc.data().Entregado,
                                 fecha: fechaRegistro,
                               });    
                               
                         });
-                        console.log(querySnapshot.size);    
-                                                           
+                        console.log(querySnapshot.size);                                                            
                        
                     });
         } else {
@@ -825,7 +827,8 @@
                                 cedula: doc.data().Cedula, 
                                 nombre: doc.data().Nombre,
                                 ebais: doc.data().Ebais,
-                                
+                                cantDiasLaborados: doc.data().cantDiasTrabajados,
+
                                 Departamento: doc.data().Departamento,
                                 
                                 correoUsuario: doc.data().Usuario,
@@ -858,8 +861,7 @@
    console.log(identificacion)
    console.log(this.editedItem.cedula)
    coleccion = 'roll'
-   console.log ('canDias'+this.editedItem.cantDiasLaborados)
-   console.log ('doc cant dias'+ doc.data().cantDiasLaborados)
+   
 
  /*  db.collection("CopiasFechaDesde").where("Cedula", "==", "700440896") */
      db.collection(coleccion + this.ebaisAutorizados.Unidad).where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
@@ -868,15 +870,14 @@
                      //console.log(doc.id, " => ", doc.data());
                      console.log(doc.id, " => ", doc.data().Nombre);
                      console.log(doc.id, " => ", doc.data().TipoID);
-                     //console.log(db.collection.length) ///aqui nos quedamos
-
+                     
                      this.editedItem.tipoid = doc.data().TipoID
                      
                      this.editedItem.nombre=  doc.data().Nombre
-                     
+                     this.editedItem.cantDiasLaborados = doc.data().cantDiasTrabajados
                      this.editedItem.diaslaborados = doc.data().Diaslaborados[1]
                      this.editedItem.Departamento = doc.data().Departamento
-                     this.editItem.cantDiasLaborados = doc.data().cantDiasLaborados
+                    
                         });
                     });
 
@@ -979,7 +980,7 @@ var fechaImpresion = new Date().toLocaleString();
 
 
       update(){
-           //console.log(miarray)
+           console.log('aqui estoy piniendo el array '+miarray)
           this.listaEbaisAutorizados = miarray
           this.readonly =  !usuarioAvanzado
           
@@ -1033,6 +1034,8 @@ var fechaImpresion = new Date().toLocaleString();
         console.log( this.editedIndex)
         console.log(item.varid)
         console.log(item.cedula)
+        console.log('dcantida de dias a '+ item.cantDiasLaborados)
+        
   
         this.editedItem = Object.assign({}, item)
         this.dialog = true
@@ -1104,7 +1107,8 @@ var fechaImpresion = new Date().toLocaleString();
             TipoID: this.editedItem.tipoid,
               Cedula:this.editedItem.cedula,
               Nombre: this.editedItem.nombre,
-          
+              cantDiasTrabajados : this.editedItem.diasTrabajados.length,
+             DiasLaborados: this.editedItem.diasTrabajados,
              
               //Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
@@ -1128,7 +1132,7 @@ var fechaImpresion = new Date().toLocaleString();
 
 console.log ('cedula '+this.editedItem.cedula)
 console.log ('nombre '+this.editedItem.nombre)
-console.log ('dias lab '+this.diaslaborados)
+
 console.log ('DEPARTAMENTO' + this.ebaisAutorizados.Nombre)
 console.log ('CORREO '+this.correo)
 console.log ('UNIDAD '+ this.ebaisAutorizados.Unidad)
@@ -1143,7 +1147,7 @@ console.log ('UNIDAD '+ this.ebaisAutorizados.Unidad)
              Nombre: this.editedItem.nombre,           
              Departamento: this.ebaisAutorizados.Nombre,
              Ebais: this.ebaisAutorizados.Unidad,
-             cantDiasLaborados : this.diaslaborados.length,
+             cantDiasTrabajados : this.diaslaborados.length,
              DiasLaborados: this.diaslaborados,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
              //Entregado: this.editedItem.entregado,
