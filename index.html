@@ -406,13 +406,19 @@
                       <v-spacer></v-spacer>
                      corrreo:  {{correoUsuario}} / 
                       <v-spacer></v-spacer>
-                       Dias Trabajados {{editedItem.cantDiasLaborados}}
+                      <h4 v-if="editedItem.diasTrabajados">Dias Trabajados {{ editedItem.diasTrabajados.length }}</h4>
+                             
+                     
+                    
                       <v-spacer></v-spacer>
                       identificador unico  {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
                       <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
                     </v-card-actions>
+
+                    <v-spacer></v-spacer>   
                   </v-card>
+                 
                 </v-dialog>
               </v-toolbar>
             </template>
@@ -501,6 +507,17 @@
     data: () => 
   ({
 
+
+
+
+    myArray: [
+          { category: 'Laravel' },
+          { category: 'PHP' },
+          { category: 'Codeigniter' },
+          { category: 'vuejs' }
+        ],
+
+
     diaslaborados: [],
       menudiaslaborados: false,
 
@@ -516,6 +533,7 @@
       opciones: [
         { title: 'Reporte por Rango de Fechas' },     
       ],
+      cantidaddediastrabajados:0,
 
       
 
@@ -591,6 +609,8 @@
 
         ebaisAutorizados: { Nombre: '', Codigo:'', Unidad:''},
         listaEbaisAutorizados: [],
+  
+        
        show1: false,
         password: '',
         contraseña:'',
@@ -636,13 +656,14 @@
         tipoid: '',
         diaslaborados: [],
         cantDiasLaborados:0,
-
         Departamento: 0,
         correo: '',
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
-        entregado: false
+        entregado: false,
+         ///////////**-*-*--*--*-*-*
+        cantidadDias:0,
       },
       defaultItem: {
         nombre: '',
@@ -655,21 +676,19 @@
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
-        entregado: false
+        entregado: false,
+        ///////////**-*-*--*--*-*-*
+        cantidadDias:0,
       },
     }),
 
       computed: {
-     
-      ordenarDiaslaborados() {
-        return this.editedItem.diasTrabajados.sort();
-      },
-
-      cantDiasTrabajados()
-      {
-        return  this.editedItem.diasTrabajados.length;
-      },
-      
+    ndias(){
+      return  this.editedItem.diasTrabajados.length
+    },
+        
+  
+    
 
       dateRangeText () {
         return this.diaslaborados.join(' ~ ')
@@ -679,7 +698,7 @@
         return this.editedIndex === -1 ? 'Nuevo Registro' : 'Edit Item'
       },
       botonEsVisible(){
-        //cambia el estado del boton si paswword es menor que 8
+        //cambia el estado del boton si password es menor que 8
         return this.password.length < 8
       },
       
@@ -795,6 +814,9 @@
 
       },
 
+
+      
+      
       // getColor (estado) {
       //   if (estado == "Solicitado") return 'red'
       //   else if (estado == "263203") return 'orange'
