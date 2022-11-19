@@ -255,9 +255,9 @@
                             :items-per-page="itemsPerPage"
                             dense
                           >
-                          <template v-slot:item.entregado="{ item }">
+                          <!-- <template v-slot:item.entregado="{ item }">
                             <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
-                          </template>
+                          </template> -->
                           </v-data-table>
                         </template>
                       </v-card>
@@ -282,7 +282,7 @@
                       <v-btn icon dark @click="close">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                      <v-toolbar-title>Nuevo registro </v-toolbar-title>
+                      <v-toolbar-title>Roll de Sustitutos </v-toolbar-title>
                       <v-spacer></v-spacer>
                       <v-toolbar-items>
                         <v-btn dark text @click="save">Save</v-btn>
@@ -311,9 +311,9 @@
                         </v-btn>
                         
                       </v-col>
-                      <v-col cols="4" >
+                      <!-- <v-col cols="4" >
                         <v-switch class="d-inline" v-model="editedItem.entregado" :readonly="readonly" :label="`Entregado: ${editedItem.entregado}` "></v-switch>
-                      </v-col>
+                      </v-col> -->
                    
                   </v-row>
   
@@ -696,7 +696,7 @@
       },
 
      formTitle () {
-        return this.editedIndex === -1 ? 'Nuevo Registro' : 'Edit Item'
+        return this.editedIndex === -1 ? 'Nuevo Registro' : 'Editar Registro'
       },
       botonEsVisible(){
         //cambia el estado del boton si password es menor que 8
