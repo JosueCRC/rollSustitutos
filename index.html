@@ -69,7 +69,7 @@
                       :items="listaEbaisAutorizados"
                       item-text="Nombre"
                       item-value="Codigo"      
-                      label="Establecimiento de Salud"
+                      label="Departamento"
                       persistent-hint
                       return-object
                       single-line
@@ -407,7 +407,7 @@
                      corrreo:  {{correoUsuario}} / 
                       <v-spacer></v-spacer>
                       <h4 v-if="editedItem.diasTrabajados">Días Trabajados: {{ editedItem.diasTrabajados.length }}</h4>
-                                                
+                      <h2> {{ordenarDiasLaborados}} </h2>                  
                       <v-spacer></v-spacer>
                       identificador unico  {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
@@ -638,7 +638,7 @@
           { text: 'Ebais', value: 'ebais' },
           { text: 'Departamento', value: 'Departamento'},
           //{ text: 'Entregado SI/NO', value: 'entregado' },
-          { text: 'Trabajados', value: 'diasTrabajados' },
+          //{ text: 'Trabajados', value: 'diasTrabajados' },
           { text: 'Digitado', value: 'fecha' },
           //{ text: 'Usuario', value: 'correoUsuario' },
           {text: 'CantDias', value: 'cantDiasLaborados'},
@@ -681,10 +681,13 @@
     }),
 
       computed: {
-    ndias(){
-      return  this.editedItem.diasTrabajados.length
-    },
+    
+    
+    
         
+   // ordenarDiaslaborados() {
+      //  return this.diaslaborados.sort();
+     //  },
   
     
 
